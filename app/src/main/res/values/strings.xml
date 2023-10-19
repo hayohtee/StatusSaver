@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Status Saver</string>
+    <string name="save_whatsapp_status">Save Whatsapp Status</string>
+    <string name="recent">Recent</string>
+    <string name="saved">Saved</string>
+    <string name="enable_storage_access">Enable Storage Access</string>
+    <string name="enable_read_storage_access_text">
+        Dear User, you needs to enable storage access to read your WhatsApp status
+    </string>
+    <string name="enable_write_storage_access_text">
+        Dear User, you needs to enable storage access to save your WhatsApp status
+    </string>
+    <string name="play_video">Play Video</string>
+    <string name="save_status">Save status</string>
 </resources>
