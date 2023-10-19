@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import dev.hayohtee.statussaver.ui.StatusSaverApp
 import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,8 +23,9 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) {
-
+                )
+                {
+                    StatusSaverApp()
                 }
             }
         }
