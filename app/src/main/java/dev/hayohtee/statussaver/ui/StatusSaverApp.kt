@@ -29,9 +29,9 @@ fun StatusSaverApp(modifier: Modifier = Modifier) {
     HomeScreen(
         uiState = uiState,
         onAccessDirectoryClick = {
-            println("Clicked")
             directoryLauncher.launch(null)
         },
+        updateSavedStatus = viewModel::updateSavedStatus,
         modifier = modifier
     )
 }
