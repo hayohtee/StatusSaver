@@ -26,7 +26,7 @@ fun RecentScreen(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        if (!uiState.isDirectoryAccessGranted && !uiState.isLoading) {
+        if (!uiState.isDirectoryAccessGranted && !uiState.isRecentStatusesLoading) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

@@ -18,32 +18,55 @@ import kotlinx.coroutines.launch
 class StatusViewModel(private val statusRepository: StatusRepository) : ViewModel() {
     var uiState by mutableStateOf(StatusUiState())
         private set
+    private var uri: Uri? = null
 
     init {
         viewModelScope.launch {
-            updateUiState(statusRepository.getStatusDirectoryUri())
+            uri = statusRepository.getStatusDirectoryUri()
+            updateUiState(uri)
         }
     }
 
     private fun updateUiState(uri: Uri?) {
-        viewModelScope.launch {
-            val recentStatuses = async { statusRepository.getRecentStatuses(uri) }
-//            val savedStatuses = async { statusRepository.getSavedStatuses() }
-
+        if (uri == null) {
             uiState = uiState.copy(
-                isDirectoryAccessGranted = uri != null,
-                isLoading = false,
-                recentStatuses = recentStatuses.await(),
-//                savedStatuses = savedStatuses.await()
+                isRecentStatusesLoading = false,
+                isSavedStatusesLoading = false
+            )
+        } else {
+            viewModelScope.launch {
+                val recentStatuses = async { statusRepository.getRecentStatuses(uri) }
+                val savedStatuses = async { statusRepository.getSavedStatuses() }
+
+                uiState = uiState.copy(
+                    isDirectoryAccessGranted = true,
+                    isSavedStatusesLoading = false,
+                    isRecentStatusesLoading = false,
+                    recentStatuses = recentStatuses.await(),
+                    savedStatuses = savedStatuses.await()
+                )
+            }
+        }
+    }
+
+    fun updateSavedStatus() {
+        uiState = uiState.copy(
+            isSavedStatusesLoading = true
+        )
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                savedStatuses = statusRepository.getSavedStatuses(),
+                isSavedStatusesLoading = false
             )
         }
     }
 
-    fun saveStatusDirectoryUri(uri: Uri) {
+    fun saveStatusDirectoryUri(newUri: Uri) {
+        uri = newUri
         viewModelScope.launch {
             uiState = uiState.copy(isDirectoryAccessGranted = true)
-
-            statusRepository.saveStatusDirectoryUri(uri)
+            statusRepository.saveStatusDirectoryUri(uri!!)
             updateUiState(uri)
         }
     }

@@ -2,7 +2,9 @@ package dev.hayohtee.statussaver.data
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -25,7 +27,11 @@ class StatusRepository(
             val directory = DocumentFile.fromTreeUri(context, uri)
             val files = directory?.listFiles()
 
-            files?.sortedByDescending { it.lastModified() }?.map { file ->
+            files?.sortedByDescending { it.lastModified() }?.filter {
+                it.name!!.endsWith(".jpg") ||
+                        it.name!!.endsWith(".png") ||
+                        it.name!!.endsWith(".mp4")
+            }?.map { file ->
                 Status(
                     id = file.name.hashCode().toLong(),
                     uri = file.uri,
@@ -36,7 +42,28 @@ class StatusRepository(
         }
     }
 
-    fun getSavedStatuses(): List<Status> {
+    suspend fun getSavedStatuses(): List<Status> {
+
+        val directory = Environment
+            .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            .resolve(SAVED_STATUS_PATH)
+
+        println("Directory: ${directory.path}")
+        if (directory.exists()) {
+            println("Directory: ${directory.path} exists")
+            return withContext(Dispatchers.IO) {
+                val files = directory.listFiles()
+                println("Files: ${files?.size}")
+                files?.sortedByDescending { it.lastModified() }?.map { file ->
+                    Status(
+                        id = file.name.hashCode().toLong(),
+                        uri = file.toUri(),
+                        isVideo = file.name.endsWith(".mp4"),
+                        isSaved = true
+                    )
+                } ?: emptyList()
+            }
+        }
         return emptyList()
     }
 
@@ -67,5 +94,6 @@ class StatusRepository(
     private companion object {
         val STATUS_DIRECTORY_URI_KEY = stringPreferencesKey("status_directory_uri")
         const val TAG = "StatusRepository"
+        const val SAVED_STATUS_PATH = "StatusSaver"
     }
 }

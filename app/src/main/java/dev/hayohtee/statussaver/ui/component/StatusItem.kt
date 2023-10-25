@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.VideoFrameDecoder
 import dev.hayohtee.statussaver.R
@@ -32,25 +33,32 @@ fun StatusItem(
     onStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .components {
-            add(VideoFrameDecoder.Factory())
-        }.crossfade(true)
-        .build()
-
-    val painter = rememberAsyncImagePainter(model = status.uri, imageLoader = imageLoader)
-
     Box(modifier = modifier
         .size(150.dp, 200.dp)
         .clip(RoundedCornerShape(10))
         .clickable { onStatusClick(status) }
     ) {
-        Image(
-            painter = painter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
-        )
+        if (status.isVideo) {
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = status.uri,
+                    imageLoader = ImageLoader.Builder(LocalContext.current)
+                        .components {
+                            add(VideoFrameDecoder.Factory())
+                        }.crossfade(true).build()
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
+            )
+        } else {
+            AsyncImage(
+                model = status.uri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
+            )
+        }
         Box(
             modifier = Modifier
                 .matchParentSize()

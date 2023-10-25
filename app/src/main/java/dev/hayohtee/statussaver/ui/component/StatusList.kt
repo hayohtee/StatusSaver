@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,7 +20,8 @@ fun StatusList(
         modifier = modifier.fillMaxSize(),
         columns = GridCells.Fixed(3)
     ) {
-        items(items = statuses, key = { it -> it.id }) { status ->
+        items(count = statuses.size, key = { statuses[it].id }) { index ->
+            val status = statuses[index]
             StatusItem(
                 status = status,
                 onSaveStatusClick = { onSaveStatusClick(status) },
