@@ -1,10 +1,12 @@
 package dev.hayohtee.statussaver.ui.screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -15,23 +17,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.hayohtee.statussaver.R
 import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: StatusUiState,
     onAccessDirectoryClick: () -> Unit,
+    updateSavedStatus: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -54,41 +59,80 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            var tabIndex by remember { mutableIntStateOf(0) }
-            val tabsTitle = listOf(
-                stringResource(id = R.string.recent),
-                stringResource(id = R.string.saved)
+            HomeScreenContent(
+                uiState = uiState,
+                updateSavedStatus = updateSavedStatus,
+                onAccessDirectoryClick = onAccessDirectoryClick
             )
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                TabRow(selectedTabIndex = tabIndex) {
-                    tabsTitle.forEachIndexed { index, title ->
-                        Tab(
-                            selected = tabIndex == index,
-                            onClick = { tabIndex = index },
-                            modifier = Modifier.height(48.dp),
-                        ) {
-                            Text(
-                                text = title.uppercase(),
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
-                }
-                when (tabIndex) {
-                    0 -> RecentScreen(
-                        uiState = uiState,
-                        onAccessDirectoryClick = onAccessDirectoryClick,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                    1 -> SavedScreen(savedStatuses = uiState.savedStatuses)
-                }
-            }
         }
     }
 }
 
+data class TabItem(val title: String)
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HomeScreenContent(
+    uiState: StatusUiState,
+    updateSavedStatus: () -> Unit,
+    onAccessDirectoryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tabItems = listOf(
+        TabItem(stringResource(id = R.string.recent)),
+        TabItem(stringResource(id = R.string.saved))
+    )
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState { tabItems.size }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(modifier = modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            tabItems.forEachIndexed { index, tab ->
+                Tab(
+                    selected = (index == selectedTabIndex),
+                    onClick = {
+                        selectedTabIndex = index
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(selectedTabIndex)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = tab.title.uppercase(),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                )
+            }
+        }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { index ->
+            when (index) {
+                0 -> RecentScreen(
+                    uiState = uiState,
+                    onAccessDirectoryClick = onAccessDirectoryClick,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                1 -> SavedScreen(
+                    uiState = uiState,
+                    updateSavedStatus = updateSavedStatus,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = pagerState.currentPage, key2 = pagerState.isScrollInProgress) {
+        if (!pagerState.isScrollInProgress) {
+            selectedTabIndex = pagerState.currentPage
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -100,7 +144,8 @@ fun HomeScreenPreview() {
                 recentStatuses = emptyList(),
                 savedStatuses = emptyList()
             ),
-            onAccessDirectoryClick = {}
+            onAccessDirectoryClick = {},
+            updateSavedStatus = {}
         )
     }
 }
