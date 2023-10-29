@@ -37,6 +37,8 @@ fun HomeScreen(
     onAccessDirectoryClick: () -> Unit,
     updateSavedStatus: () -> Unit,
     onSaveStatusClick: suspend (Status) -> Unit,
+    fetchRecentStatuses: suspend () -> Unit,
+    fetchSavedStatuses: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -63,7 +65,9 @@ fun HomeScreen(
                 uiState = uiState,
                 updateSavedStatus = updateSavedStatus,
                 onAccessDirectoryClick = onAccessDirectoryClick,
-                onSaveStatusClick = onSaveStatusClick
+                onSaveStatusClick = onSaveStatusClick,
+                fetchRecentStatuses = fetchRecentStatuses,
+                fetchSavedStatuses = fetchSavedStatuses,
             )
         }
     }
@@ -79,6 +83,8 @@ fun HomeScreenContent(
     updateSavedStatus: () -> Unit,
     onAccessDirectoryClick: () -> Unit,
     onSaveStatusClick: suspend (Status) -> Unit,
+    fetchRecentStatuses: suspend () -> Unit,
+    fetchSavedStatuses: suspend () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val tabItems = listOf(
@@ -122,12 +128,14 @@ fun HomeScreenContent(
                     uiState = uiState,
                     onAccessDirectoryClick = onAccessDirectoryClick,
                     onSaveStatusClick = onSaveStatusClick,
+                    fetchRecentStatuses = fetchRecentStatuses,
                     modifier = Modifier.fillMaxSize()
                 )
 
                 1 -> SavedScreen(
                     uiState = uiState,
                     updateSavedStatus = updateSavedStatus,
+                    fetchSavedStatuses = fetchSavedStatuses,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -147,7 +155,9 @@ fun HomeScreenPreview() {
             ),
             onAccessDirectoryClick = {},
             updateSavedStatus = {},
-            onSaveStatusClick = {}
+            onSaveStatusClick = {},
+            fetchRecentStatuses = {},
+            fetchSavedStatuses = {}
         )
     }
 }
