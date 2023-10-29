@@ -55,17 +55,14 @@ class StatusViewModel(private val statusRepository: StatusRepository) : ViewMode
         }
     }
 
-    fun fetchRecentStatuses() {
-        viewModelScope.launch {
-            uiState = uiState.copy(
-                recentStatuses = transformStatuses(
-                    recentStatuses = statusRepository.getRecentStatuses(uri),
-                    savedStatuses = uiState.savedStatuses
-                )
-            )
-        }
+    suspend fun fetchRecentStatuses() {
+        uiState = uiState.copy(
+            recentStatuses = transformStatuses(
+                recentStatuses = statusRepository.getRecentStatuses(uri),
+                savedStatuses = uiState.savedStatuses
+            ),
+        )
     }
-
 
     private suspend fun transformStatuses(
         recentStatuses: List<Status>,
@@ -82,12 +79,8 @@ class StatusViewModel(private val statusRepository: StatusRepository) : ViewMode
         }
     }
 
-    fun fetchSavedStatuses() {
-        viewModelScope.launch {
-            uiState = uiState.copy(
-                savedStatuses = statusRepository.getSavedStatuses(),
-            )
-        }
+    suspend fun fetchSavedStatuses() {
+        uiState = uiState.copy(savedStatuses = statusRepository.getSavedStatuses())
     }
 
     suspend fun saveStatus(status: Status) {
