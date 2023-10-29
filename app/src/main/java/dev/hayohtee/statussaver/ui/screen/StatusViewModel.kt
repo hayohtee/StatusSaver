@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.hayohtee.statussaver.StatusSaverApplication
+import dev.hayohtee.statussaver.data.Status
 import dev.hayohtee.statussaver.data.StatusRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -68,6 +69,12 @@ class StatusViewModel(private val statusRepository: StatusRepository) : ViewMode
             uiState = uiState.copy(isDirectoryAccessGranted = true)
             statusRepository.saveStatusDirectoryUri(uri!!)
             updateUiState(uri)
+        }
+    }
+
+    fun saveStatus(status: Status) {
+        viewModelScope.launch {
+            statusRepository.saveStatus(status)
         }
     }
 
