@@ -90,11 +90,9 @@ class StatusViewModel(private val statusRepository: StatusRepository) : ViewMode
         }
     }
 
-    fun saveStatus(status: Status) {
-        viewModelScope.launch {
-            statusRepository.saveStatus(status)
-            fetchSavedStatuses()
-        }
+    suspend fun saveStatus(status: Status) {
+        statusRepository.saveStatus(status)
+        fetchSavedStatuses()
     }
 
     fun updateSavedStatus() {
