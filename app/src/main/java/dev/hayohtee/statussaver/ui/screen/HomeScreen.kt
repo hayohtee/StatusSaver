@@ -36,7 +36,7 @@ fun HomeScreen(
     uiState: StatusUiState,
     onAccessDirectoryClick: () -> Unit,
     updateSavedStatus: () -> Unit,
-    onSaveStatusClick: (Status) -> Unit,
+    onSaveStatusClick: suspend (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -78,7 +78,7 @@ fun HomeScreenContent(
     uiState: StatusUiState,
     updateSavedStatus: () -> Unit,
     onAccessDirectoryClick: () -> Unit,
-    onSaveStatusClick: (Status) -> Unit,
+    onSaveStatusClick: suspend (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val tabItems = listOf(
