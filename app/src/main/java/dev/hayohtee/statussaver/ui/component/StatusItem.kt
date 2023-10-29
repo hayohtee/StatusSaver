@@ -1,5 +1,7 @@
 package dev.hayohtee.statussaver.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +12,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,14 +32,18 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.VideoFrameDecoder
 import dev.hayohtee.statussaver.R
 import dev.hayohtee.statussaver.data.Status
+import kotlinx.coroutines.launch
 
 @Composable
 fun StatusItem(
     status: Status,
-    onSaveStatusClick: (Status) -> Unit,
+    onSaveStatusClick: suspend (Status) -> Unit,
     onStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isSaved by rememberSaveable(status) { mutableStateOf(status.isSaved) }
+    val coroutineScope = rememberCoroutineScope()
+
     Box(modifier = modifier
         .size(150.dp, 200.dp)
         .clip(RoundedCornerShape(10))
@@ -65,13 +76,21 @@ fun StatusItem(
                 .background(Color.Black.copy(alpha = 0.2f))
         )
 
-        if (!status.isSaved) {
+        AnimatedVisibility(
+            visible = !isSaved,
+            modifier = Modifier
+                .size(30.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = (-5).dp, y = 5.dp),
+            exit = fadeOut()
+        ) {
             IconButton(
-                onClick = { onSaveStatusClick(status) },
-                modifier = Modifier
-                    .size(30.dp)
-                    .align(Alignment.TopEnd)
-                    .offset(x = (-5).dp, y = 5.dp)
+                onClick = {
+                    coroutineScope.launch {
+                        onSaveStatusClick(status)
+                        isSaved = true
+                    }
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_download),
@@ -80,6 +99,7 @@ fun StatusItem(
                 )
             }
         }
+
 
         if (status.isVideo) {
             Icon(
