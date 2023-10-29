@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.hayohtee.statussaver.StatusDocumentContract
-import dev.hayohtee.statussaver.ui.screen.StatusViewModel
 import dev.hayohtee.statussaver.ui.screen.HomeScreen
+import dev.hayohtee.statussaver.ui.screen.StatusViewModel
 
 @Composable
 fun StatusSaverApp(modifier: Modifier = Modifier) {
@@ -28,11 +28,11 @@ fun StatusSaverApp(modifier: Modifier = Modifier) {
 
     HomeScreen(
         uiState = uiState,
-        onAccessDirectoryClick = {
-            directoryLauncher.launch(null)
-        },
+        onAccessDirectoryClick = { directoryLauncher.launch(null) },
         updateSavedStatus = viewModel::updateSavedStatus,
         onSaveStatusClick = viewModel::saveStatus,
+        fetchRecentStatuses = viewModel::fetchRecentStatuses,
+        fetchSavedStatuses = viewModel::fetchSavedStatuses,
         modifier = modifier
     )
 }
