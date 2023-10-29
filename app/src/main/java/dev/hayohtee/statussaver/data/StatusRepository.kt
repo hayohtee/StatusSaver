@@ -117,14 +117,15 @@ class StatusRepository(
 
             val destinationFile = File(destination, status.name)
 
-            contentResolver.openInputStream(status.uri).use { inputStream ->
-
-                contentResolver.openOutputStream(destinationFile.toUri()).use { outputStream ->
-                    outputStream?.write(inputStream?.readBytes())
+            try {
+                contentResolver.openInputStream(status.uri).use { inputStream ->
+                    contentResolver.openOutputStream(destinationFile.toUri()).use { outputStream ->
+                        outputStream?.write(inputStream?.readBytes())
+                    }
                 }
-
+            } catch (exception: Exception) {
+                exception.printStackTrace()
             }
-
         }
     }
 
