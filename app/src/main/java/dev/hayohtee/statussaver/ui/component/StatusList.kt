@@ -20,7 +20,7 @@ fun StatusList(
         modifier = modifier.fillMaxSize(),
         columns = GridCells.Fixed(3)
     ) {
-        items(count = statuses.size, key = { statuses[it].id }) { index ->
+        items(count = statuses.size, key = { statuses[it].name }) { index ->
             val status = statuses[index]
             StatusItem(
                 status = status,
