@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.IOException
 
 class StatusRepository(
@@ -52,29 +53,33 @@ class StatusRepository(
                 sortOrder
             )
 
+
             val statuses = mutableListOf<Status>()
 
             cursor?.use {
                 val documentIdIndex = cursor.getColumnIndexOrThrow(COLUMN_DOCUMENT_ID)
                 val documentNameIndex = cursor.getColumnIndexOrThrow(COLUMN_DISPLAY_NAME)
                 val mimeTypeIndex = cursor.getColumnIndexOrThrow(COLUMN_MIME_TYPE)
+                val lastModifiedIndex = cursor.getColumnIndexOrThrow(COLUMN_LAST_MODIFIED)
 
                 while (cursor.moveToNext()) {
                     val documentId = cursor.getString(documentIdIndex)
                     val documentName = cursor.getString(documentNameIndex)
                     val mimeType = cursor.getString(mimeTypeIndex)
+                    val lastModified = cursor.getLong(lastModifiedIndex)
 
                     val status = Status(
-                        id = documentName.hashCode().toLong(),
+                        name = documentName,
                         uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId),
                         isVideo = mimeType.startsWith("video/"),
-                        isSaved = false
+                        isSaved = false,
+                        lastModified = lastModified
                     )
                     statuses.add(status)
                 }
             }
 
-            return@withContext statuses
+            return@withContext statuses.sortedByDescending { it.lastModified }
         }
     }
 
@@ -89,15 +94,38 @@ class StatusRepository(
                 val files = directory.listFiles()
                 files?.sortedByDescending { it.lastModified() }?.map { file ->
                     Status(
-                        id = file.name.hashCode().toLong(),
+                        name = file.name,
                         uri = file.toUri(),
                         isVideo = file.name.endsWith(".mp4"),
-                        isSaved = true
+                        isSaved = true,
+                        lastModified = file.lastModified()
                     )
                 } ?: emptyList()
             }
         }
         return emptyList()
+    }
+
+    suspend fun saveStatus(status: Status) {
+        val contentResolver = context.contentResolver
+        withContext(Dispatchers.IO) {
+            val destination = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .resolve(SAVED_STATUS_PATH)
+
+            if (!destination.exists()) destination.mkdir()
+
+            val destinationFile = File(destination, status.name)
+
+            contentResolver.openInputStream(status.uri).use { inputStream ->
+
+                contentResolver.openOutputStream(destinationFile.toUri()).use { outputStream ->
+                    outputStream?.write(inputStream?.readBytes())
+                }
+
+            }
+
+        }
     }
 
     suspend fun saveStatusDirectoryUri(statusDirectoryUri: Uri) {
