@@ -21,15 +21,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.hayohtee.statussaver.R
+import dev.hayohtee.statussaver.data.Status
 import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +36,7 @@ fun HomeScreen(
     uiState: StatusUiState,
     onAccessDirectoryClick: () -> Unit,
     updateSavedStatus: () -> Unit,
+    onSaveStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -62,7 +62,8 @@ fun HomeScreen(
             HomeScreenContent(
                 uiState = uiState,
                 updateSavedStatus = updateSavedStatus,
-                onAccessDirectoryClick = onAccessDirectoryClick
+                onAccessDirectoryClick = onAccessDirectoryClick,
+                onSaveStatusClick = onSaveStatusClick
             )
         }
     }
@@ -77,6 +78,7 @@ fun HomeScreenContent(
     uiState: StatusUiState,
     updateSavedStatus: () -> Unit,
     onAccessDirectoryClick: () -> Unit,
+    onSaveStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val tabItems = listOf(
@@ -85,19 +87,23 @@ fun HomeScreenContent(
     )
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
-    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = pagerState.currentPage, key2 = pagerState.isScrollInProgress) {
+        if (!pagerState.isScrollInProgress) {
+            selectedTabIndex = pagerState.currentPage
+        }
+    }
+
+    LaunchedEffect(key1 = selectedTabIndex) {
+        pagerState.animateScrollToPage(selectedTabIndex)
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTabIndex) {
             tabItems.forEachIndexed { index, tab ->
                 Tab(
                     selected = (index == selectedTabIndex),
-                    onClick = {
-                        selectedTabIndex = index
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(selectedTabIndex)
-                        }
-                    },
+                    onClick = { selectedTabIndex = index },
                     text = {
                         Text(
                             text = tab.title.uppercase(),
@@ -115,6 +121,7 @@ fun HomeScreenContent(
                 0 -> RecentScreen(
                     uiState = uiState,
                     onAccessDirectoryClick = onAccessDirectoryClick,
+                    onSaveStatusClick = onSaveStatusClick,
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -124,12 +131,6 @@ fun HomeScreenContent(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-        }
-    }
-
-    LaunchedEffect(key1 = pagerState.currentPage, key2 = pagerState.isScrollInProgress) {
-        if (!pagerState.isScrollInProgress) {
-            selectedTabIndex = pagerState.currentPage
         }
     }
 }
@@ -145,7 +146,8 @@ fun HomeScreenPreview() {
                 savedStatuses = emptyList()
             ),
             onAccessDirectoryClick = {},
-            updateSavedStatus = {}
+            updateSavedStatus = {},
+            onSaveStatusClick = {}
         )
     }
 }
