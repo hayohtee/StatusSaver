@@ -24,7 +24,7 @@ import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
 fun RecentScreen(
     uiState: StatusUiState,
     onAccessDirectoryClick: () -> Unit,
-    onSaveStatusClick: (Status) -> Unit,
+    onSaveStatusClick: suspend (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
