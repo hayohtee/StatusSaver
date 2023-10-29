@@ -11,14 +11,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.hayohtee.statussaver.StatusSaverApplication
+import dev.hayohtee.statussaver.data.Status
 import dev.hayohtee.statussaver.data.StatusRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class StatusViewModel(private val statusRepository: StatusRepository) : ViewModel() {
+    private var uri: Uri? = null
     var uiState by mutableStateOf(StatusUiState())
         private set
-    private var uri: Uri? = null
 
     init {
         viewModelScope.launch {
@@ -42,11 +45,54 @@ class StatusViewModel(private val statusRepository: StatusRepository) : ViewMode
                     isDirectoryAccessGranted = true,
                     isSavedStatusesLoading = false,
                     isRecentStatusesLoading = false,
-                    recentStatuses = recentStatuses.await(),
+                    recentStatuses = transformStatuses(
+                        recentStatuses = recentStatuses.await(),
+                        savedStatuses = savedStatuses.await()
+                    ),
                     savedStatuses = savedStatuses.await()
                 )
             }
         }
+    }
+
+    fun fetchRecentStatuses() {
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                recentStatuses = transformStatuses(
+                    recentStatuses = statusRepository.getRecentStatuses(uri),
+                    savedStatuses = uiState.savedStatuses
+                )
+            )
+        }
+    }
+
+
+    private suspend fun transformStatuses(
+        recentStatuses: List<Status>,
+        savedStatuses: List<Status>
+    ): List<Status> {
+        return withContext(Dispatchers.Default) {
+            recentStatuses.map { recentStatus ->
+                recentStatus.copy(
+                    isSaved = savedStatuses.any { savedStatus ->
+                        savedStatus.name == recentStatus.name
+                    }
+                )
+            }
+        }
+    }
+
+    fun fetchSavedStatuses() {
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                savedStatuses = statusRepository.getSavedStatuses(),
+            )
+        }
+    }
+
+    suspend fun saveStatus(status: Status) {
+        statusRepository.saveStatus(status)
+        fetchSavedStatuses()
     }
 
     fun updateSavedStatus() {

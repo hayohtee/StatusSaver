@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hayohtee.statussaver.R
+import dev.hayohtee.statussaver.data.Status
 import dev.hayohtee.statussaver.ui.component.StatusList
 import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
 
@@ -23,6 +24,7 @@ import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
 fun RecentScreen(
     uiState: StatusUiState,
     onAccessDirectoryClick: () -> Unit,
+    onSaveStatusClick: suspend (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -49,7 +51,7 @@ fun RecentScreen(
         } else {
             StatusList(
                 statuses = uiState.recentStatuses,
-                onSaveStatusClick = {},
+                onSaveStatusClick = onSaveStatusClick,
                 onStatusClick = {}
             )
         }
@@ -62,6 +64,7 @@ fun RecentScreenPreview() {
     StatusSaverTheme {
         RecentScreen(
             uiState = StatusUiState(),
+            onSaveStatusClick = {},
             onAccessDirectoryClick = { }
         )
     }

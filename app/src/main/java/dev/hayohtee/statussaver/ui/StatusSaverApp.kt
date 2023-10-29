@@ -32,6 +32,7 @@ fun StatusSaverApp(modifier: Modifier = Modifier) {
             directoryLauncher.launch(null)
         },
         updateSavedStatus = viewModel::updateSavedStatus,
+        onSaveStatusClick = viewModel::saveStatus,
         modifier = modifier
     )
 }
