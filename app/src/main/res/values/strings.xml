@@ -12,4 +12,5 @@
     </string>
     <string name="play_video">Play Video</string>
     <string name="save_status">Save status</string>
+    <string name="navigate_back">Navigate back</string>
 </resources>
