@@ -1,6 +1,7 @@
 package dev.hayohtee.statussaver.data
 
 import android.content.Context
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
@@ -113,7 +114,9 @@ class StatusRepository(
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .resolve(SAVED_STATUS_PATH)
 
-            if (!destination.exists()) destination.mkdir()
+            if (!destination.exists()) {
+                destination.mkdir()
+            }
 
             val destinationFile = File(destination, status.name)
 
@@ -123,6 +126,13 @@ class StatusRepository(
                         outputStream?.write(inputStream?.readBytes())
                     }
                 }
+
+                MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(destination.absolutePath),
+                    null
+                ) { _, _ -> }
+
             } catch (exception: Exception) {
                 exception.printStackTrace()
             }
