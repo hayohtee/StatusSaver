@@ -38,6 +38,7 @@ fun RecentScreen(
     onAccessDirectoryClick: () -> Unit,
     onSaveStatusClick: suspend (Status) -> Unit,
     fetchRecentStatuses: suspend () -> Unit,
+    onStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -84,7 +85,7 @@ fun RecentScreen(
             StatusList(
                 statuses = uiState.recentStatuses,
                 onSaveStatusClick = onSaveStatusClick,
-                onStatusClick = {}
+                onStatusClick = onStatusClick
             )
         }
         PullRefreshIndicator(
@@ -103,7 +104,8 @@ fun RecentScreenPreview() {
             uiState = StatusUiState(),
             onSaveStatusClick = {},
             onAccessDirectoryClick = { },
-            fetchRecentStatuses = {}
+            fetchRecentStatuses = {},
+            onStatusClick = {}
         )
     }
 }
