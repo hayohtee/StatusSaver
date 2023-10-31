@@ -5,13 +5,13 @@ plugins {
 
 android {
     namespace = "dev.hayohtee.statussaver"
-    compileSdk = 33
+    compileSdk = 34
     compileSdkPreview = "UpsideDownCake"
 
     defaultConfig {
         applicationId = "dev.hayohtee.statussaver"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
