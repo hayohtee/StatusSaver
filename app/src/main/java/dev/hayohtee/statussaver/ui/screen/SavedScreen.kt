@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import dev.hayohtee.statussaver.R
+import dev.hayohtee.statussaver.data.Status
 import dev.hayohtee.statussaver.ui.component.StatusList
 import dev.hayohtee.statussaver.ui.theme.StatusSaverTheme
 import kotlinx.coroutines.delay
@@ -45,6 +46,7 @@ fun SavedScreen(
     uiState: StatusUiState,
     updateSavedStatus: () -> Unit,
     fetchSavedStatuses: suspend () -> Unit,
+    onStatusClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var refreshing by rememberSaveable { mutableStateOf(false) }
@@ -82,7 +84,7 @@ fun SavedScreen(
             StatusList(
                 statuses = uiState.savedStatuses,
                 onSaveStatusClick = {},
-                onStatusClick = {}
+                onStatusClick = onStatusClick
             )
         }
 
@@ -140,7 +142,8 @@ fun SavedScreenPreview() {
         SavedScreen(
             uiState = StatusUiState(),
             updateSavedStatus = {},
-            fetchSavedStatuses = {}
+            fetchSavedStatuses = {},
+            onStatusClick = {}
         )
     }
 }
