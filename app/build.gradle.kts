@@ -57,6 +57,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("io.coil-kt:coil-video:2.4.0")
 
+    // Exoplayer and media3 ui dependency
+    implementation("androidx.media3:media3-exoplayer:1.1.1")
+    implementation("androidx.media3:media3-ui:1.1.1")
+
     // Splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
 
